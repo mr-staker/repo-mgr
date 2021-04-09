@@ -1,0 +1,14 @@
+Layout/LineLength:
+  Max: 80
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/AbcSize:
+  Enabled: false
+
+AllCops:
+  NewCops: enable

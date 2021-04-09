@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: false
+
+require_relative '../lib/repo_mgr'
+
+RepoMgr::CLI.start(ARGV)
