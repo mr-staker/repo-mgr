@@ -46,4 +46,4 @@ sudo apt install createrepo rpm
 
     n.b `createrepo` is not normally available for Debian and derrivates (including Ubuntu). This tool
     has been used to bootstrap a deb repository which includes a `createrepo` build for Ubuntu 20.04,
-    therefore creating a dependency upon itself for setting up RPM repositories.
+    therefore creating a dependency upon itself for setting up rpm repositories.
