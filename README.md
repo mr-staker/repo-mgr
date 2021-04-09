@@ -2,7 +2,7 @@
 
 deb and rpm repository management tool. Essentially, this is a frontend for a suite of tools provided by various distribution maintainers.
 
-repo-mgr provides a unified and consistent way for managing various repositories.
+repo-mgr provides a unified and consistent way for managing various repositories (deb, rpm).
 
 Features:
 
