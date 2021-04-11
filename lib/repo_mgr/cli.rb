@@ -93,5 +93,25 @@ module RepoMgr
       puts "-- Added #{File.basename(options[:path])} to "\
         "#{options[:repo]} repository"
     end
+
+    desc 'remove-pkg', 'Remove a package from a repository'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to add the package to'
+    option :path, type: :string, required: true, aliases: %w[-p],
+                  desc: 'Path to the package to add to a repo'
+
+    def remove_pkg
+      type = File.extname(options[:path]).strip.downcase[1..-1]
+
+      unless CLI.types.include? type
+        Tools.error "unsupported package type #{type}"
+      end
+
+      backend = Backends.load type, Config.new
+      backend.remove_pkg options[:repo], options[:path]
+
+      puts "-- Removed #{File.basename(options[:path])} from "\
+        "#{options[:repo]} repository"
+    end
   end
 end

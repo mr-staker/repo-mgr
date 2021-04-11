@@ -40,6 +40,11 @@ module RepoMgr
         repo_publish repo
       end
 
+      def remove_pkg(repo, pkg)
+        repo_rm repo, pkg
+        repo_publish repo
+      end
+
       def check_sig(pkg)
         Open3.capture2e "dpkg-sig --verify #{pkg}"
       end
@@ -149,6 +154,17 @@ module RepoMgr
         return if status.exitstatus.zero?
 
         Tools.error "aptly repo add failed with:\n#{out}"
+      end
+
+      def repo_rm(repo, pkg)
+        package = File.basename pkg, File.extname(pkg)
+        cmd = "aptly -config=#{@aptly_config_file} repo remove "\
+          "#{repo} #{package}"
+        out, status = Open3.capture2e cmd
+
+        return if status.exitstatus.zero?
+
+        Tools.error "aptly repo remove failed with:\n#{out}"
       end
 
       def repo_publish(repo)
