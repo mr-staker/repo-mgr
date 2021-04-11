@@ -10,6 +10,8 @@ Features:
  * Add packages to these repositories and automatically sign packages using GPG.
  * Repository metadata/manifest signing using GPG.
 
+To simplify things, aptly (which, kind of obviously, manages deb repositories) uses "stable" as distribution and "main" as component.
+
 ## Install
 
 ```bash
@@ -47,3 +49,19 @@ sudo apt install createrepo rpm
     n.b `createrepo` is not normally available for Debian and derrivates (including Ubuntu). This tool
     has been used to bootstrap a deb repository which includes a `createrepo` build for Ubuntu 20.04,
     therefore creating a dependency upon itself for setting up rpm repositories.
+
+## How to use
+
+```bash
+# to get you started
+repo-mgr help
+
+# create repo
+## --path => a local directory where the repository is published - no remote support at the moment
+repo-mgr upsert-repo --name foo --type deb --path path/to/foo --keyid GPGKEYID
+
+# sign package, add to repository, and update local repo (includes sign release manifest)
+repo-mgr add-pkg --repo foo --path path/to/bar_0.0.1_amd64.deb
+```
+
+You then need to sync the repo to whatever desired target. For the time being, this isn't implemented as the main use case for this tool is publishing into a git repository which is served as GitHub page.
