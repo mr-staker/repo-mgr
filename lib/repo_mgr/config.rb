@@ -24,7 +24,7 @@ module RepoMgr
       File.write @cfg_file, @cfg.to_yaml
     end
 
-    def add_repo(name, type, path, keyid)
+    def upsert_repo(name, type, path, keyid)
       if @cfg[:repos][name] && @cfg[:repos][name][:type] != type
         Tools.error "unable to change type for #{name} repository"
       end
@@ -34,6 +34,36 @@ module RepoMgr
         path: path,
         keyid: keyid
       }
+
+      save
+    end
+
+    def add_pkg(repo, path)
+      if @cfg[:repos][repo].nil?
+        Tools.error "unable to add packages to #{repo} - repo does not exist"
+      end
+
+      @cfg[:repos][repo][:packages] ||= []
+      pkg = File.basename path
+
+      if @cfg[:repos][repo][:packages].include?(pkg)
+        Tools.error "you already have #{pkg} in your #{repo} repo"
+      end
+
+      @cfg[:repos][repo][:packages] << pkg
+
+      save
+    end
+
+    def remove_pkg(repo, path)
+      if @cfg[:repos][repo].nil?
+        Tools.error "unable to remove packages from #{repo} "\
+          '- repo does not exist'
+      end
+
+      @cfg[:repos][repo][:packages] ||= []
+      pkg = File.basename path
+      @cfg[:repos][repo][:packages].delete pkg
 
       save
     end

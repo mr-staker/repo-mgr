@@ -2,7 +2,13 @@
 
 source 'https://rubygems.org'
 
-gem 'colored'
-gem 'rubocop'
-gem 'terminal-table'
-gem 'thor'
+gem 'colored', '~> 1.2'
+gem 'gpgme', '~> 2.0'
+gem 'terminal-table', '~> 3.0'
+gem 'thor', '~> 1.1'
+
+group :development do
+  gem 'jeweler'
+  gem 'pry'
+  gem 'rubocop'
+end

@@ -15,7 +15,7 @@ To simplify things, aptly (which, kind of obviously, manages deb repositories) u
 ## Install
 
 ```bash
-gem install repo-mgr # assumes user install
+gem install repo-mgr
 ```
 
 As repo-mgr is a frontend for other tools, there's dependencies which must be installed separately.
@@ -49,6 +49,8 @@ sudo apt install createrepo rpm
     n.b `createrepo` is not normally available for Debian and derrivates (including Ubuntu). This tool
     has been used to bootstrap a deb repository which includes a `createrepo` build for Ubuntu 20.04,
     therefore creating a dependency upon itself for setting up rpm repositories.
+
+You can get our build of createrepo from our [deb repository](https://deb.staker.ltd/).
 
 ## How to use
 

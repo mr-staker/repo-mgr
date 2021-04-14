@@ -50,8 +50,8 @@ module RepoMgr
       FileUtils.mkdir_p options[:path]
 
       config = Config.new
-      config.add_repo options[:name], options[:type], options[:path],
-                      options[:keyid]
+      config.upsert_repo options[:name], options[:type], options[:path],
+                         options[:keyid]
 
       backend = Backends.load options[:type], config
       backend.add_repo options[:name]
@@ -59,9 +59,9 @@ module RepoMgr
       puts "-- Upserted #{options[:name]} repository"
     end
 
-    desc 'list', 'List existing repositories'
+    desc 'list-repos', 'List existing repositories'
 
-    def list
+    def list_repos
       rows = []
       config = Config.new
 
@@ -81,17 +81,29 @@ module RepoMgr
                   desc: 'Path to the package to add to a repo'
 
     def add_pkg
-      type = File.extname(options[:path]).strip.downcase[1..-1]
-
-      unless CLI.types.include? type
-        Tools.error "unsupported package type #{type}"
-      end
-
-      backend = Backends.load type, Config.new
+      backend, config = load_backend options[:path]
       backend.add_pkg options[:repo], options[:path]
+      config.add_pkg options[:repo], options[:path]
 
       puts "-- Added #{File.basename(options[:path])} to "\
         "#{options[:repo]} repository"
+    end
+
+    desc 'list-pkgs', 'List repository packages'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to list the packages from'
+
+    def list_pkgs
+      packages = Config.new.cfg[:repos][options[:repo]][:packages]
+
+      if packages.nil?
+        Tools.error "#{options[:repo]} repo does not have any packages"
+      end
+
+      rows = packages.sort.each_with_index.map { |e, i| [i + 1, e] }
+
+      puts Terminal::Table.new headings: ['#', "Packages in #{options[:repo]}"],
+                               rows: rows
     end
 
     desc 'remove-pkg', 'Remove a package from a repository'
@@ -101,17 +113,35 @@ module RepoMgr
                   desc: 'Path to the package to add to a repo'
 
     def remove_pkg
-      type = File.extname(options[:path]).strip.downcase[1..-1]
+      backend, config = load_backend options[:path]
+      backend.remove_pkg options[:repo], options[:path]
+      config.remove_pkg options[:repo], options[:path]
+
+      puts "-- Removed #{File.basename(options[:path])} from "\
+        "#{options[:repo]} repository"
+    end
+
+    desc 'check-sig', 'Check package signature'
+    option :path, type: :string, required: true, aliases: %w[-p],
+                  desc: 'Path to the the package to check signature'
+
+    def check_sig
+      backend = load_backend options[:path]
+      puts backend.check_sig options[:path]
+    end
+
+    private
+
+    def load_backend(path)
+      type = File.extname(path).strip.downcase[1..-1]
 
       unless CLI.types.include? type
         Tools.error "unsupported package type #{type}"
       end
 
-      backend = Backends.load type, Config.new
-      backend.remove_pkg options[:repo], options[:path]
+      config = Config.new
 
-      puts "-- Removed #{File.basename(options[:path])} from "\
-        "#{options[:repo]} repository"
+      [Backends.load(type, config), config]
     end
   end
 end

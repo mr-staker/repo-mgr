@@ -38,6 +38,7 @@ module RepoMgr
         sign_pkg repo, pkg
         repo_add repo, pkg
         repo_publish repo
+        sign_repo repo
       end
 
       def remove_pkg(repo, pkg)
@@ -46,7 +47,12 @@ module RepoMgr
       end
 
       def check_sig(pkg)
-        Open3.capture2e "dpkg-sig --verify #{pkg}"
+        out, status = Open3.capture2e "dpkg-sig --verify #{pkg}"
+
+        return out if status.exitstatus.zero?
+
+        Tools.error "unable to check package signature for #{pkg} - "\
+          "dpkg-sig returned:\n#{out}"
       end
 
       def sign_pkg(repo, pkg)
@@ -65,6 +71,10 @@ module RepoMgr
         return if status.exitstatus.zero?
 
         Tools.error "unable to sign #{pkg} - dpkg-sig returned:\n#{out}"
+      end
+
+      def sign_repo(repo)
+        puts "-- Signed repo #{repo}"
       end
 
       private

@@ -1,6 +1,7 @@
 # frozen_string_literal: false
 
 require_relative 'backends/deb'
+require_relative 'backends/rpm'
 
 module RepoMgr
   # factory loader for RepoMgr::Backend::Foo objects
