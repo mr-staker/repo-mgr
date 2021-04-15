@@ -23,6 +23,8 @@ module RepoMgr
 
         FileUtils.mkdir_p dest_dir
         FileUtils.cp pkg, dest_dir
+
+        sync_repo repo
       end
 
       def remove_pkg(repo, pkg)
@@ -31,9 +33,17 @@ module RepoMgr
         dest_dir = "#{@config.cfg_dir}/rpms/#{repo}/#{arch}"
 
         FileUtils.rm_f "#{dest_dir}/#{name}"
+
+        sync_repo repo
       end
 
       def check_sig(pkg)
+        out, status = Open3.capture2e "rpm -K #{pkg}"
+
+        return out if status.exitstatus.zero?
+
+        Tools.error "unable to check package signature for #{pkg} - "\
+          "rpm -K returned:\n#{out}"
       end
 
       def sign_pkg(repo, pkg)
@@ -59,13 +69,57 @@ module RepoMgr
         Tools.error "unable to sign #{pkg} - rpm --addsign returned:\n#{out}"
       end
 
-      def sign_repo(repo)
-      end
-
       private
 
       def extract_arch(pkg)
         pkg.split('.')[-2]
+      end
+
+      def sync_repo(repo)
+        repo_dir = @config.cfg[:repos][repo][:path]
+
+        Dir["#{@config.cfg_dir}/rpms/#{repo}/*"].each do |arch_dir|
+          arch = File.basename arch_dir
+          arch_dest = "#{repo_dir}/#{arch}"
+
+          FileUtils.rm_rf arch_dest
+          FileUtils.mkdir_p arch_dest
+
+          Dir["#{@config.cfg_dir}/rpms/#{repo}/#{arch}/*.rpm"].each do |rpm|
+            FileUtils.cp rpm, arch_dest
+          end
+
+          Dir.chdir arch_dest do
+            build_repo arch
+            Dir.chdir('repodata') { sign_repo repo }
+          end
+        end
+      end
+
+      def build_repo(arch)
+        cmd = 'createrepo --zck --verbose --update .'
+
+        out, status = Open3.capture2e cmd
+
+        return if status.exitstatus.zero?
+
+        Tools.error "unable to create repo for #{arch} - createrepo "\
+          "returned:\n#{out}"
+      end
+
+      def sign_repo(repo)
+        keyid = @config.cfg[:repos][repo][:keyid]
+
+        data = GPGME::Data.new File.read('repomd.xml')
+        opt = {
+          armor: true,
+          signer: keyid,
+          mode: GPGME::SIG_MODE_DETACH
+        }
+
+        signature = GPGME::Crypto.sign data, opt
+
+        File.write 'repomd.xml.asc', signature
       end
     end
   end

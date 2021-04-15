@@ -126,7 +126,7 @@ module RepoMgr
                   desc: 'Path to the the package to check signature'
 
     def check_sig
-      backend = load_backend options[:path]
+      backend, _config = load_backend options[:path]
       puts backend.check_sig options[:path]
     end
 

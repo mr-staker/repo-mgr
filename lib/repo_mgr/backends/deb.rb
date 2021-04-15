@@ -38,7 +38,6 @@ module RepoMgr
         sign_pkg repo, pkg
         repo_add repo, pkg
         repo_publish repo
-        sign_repo repo
       end
 
       def remove_pkg(repo, pkg)
@@ -71,10 +70,6 @@ module RepoMgr
         return if status.exitstatus.zero?
 
         Tools.error "unable to sign #{pkg} - dpkg-sig returned:\n#{out}"
-      end
-
-      def sign_repo(repo)
-        puts "-- Signed repo #{repo}"
       end
 
       private
