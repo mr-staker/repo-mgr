@@ -25,7 +25,7 @@ module RepoMgr
     def check_depends
       rows = []
 
-      %w[aptly dpkg-sig createrepo rpmsign].each do |bin_dep|
+      %w[aptly dpkg-sig createrepo rpm].each do |bin_dep|
         rows << if Tools.which bin_dep
                   [bin_dep, '✔'.green]
                 else
