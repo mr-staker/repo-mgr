@@ -45,18 +45,19 @@ module RepoMgr
         repo_publish repo
       end
 
-      def check_sig(pkg)
+      def check_sig(pkg, allow_fail = false)
         out, status = Open3.capture2e "dpkg-sig --verify #{pkg}"
 
-        return out if status.exitstatus.zero?
+        return out if status.exitstatus.zero? || allow_fail
 
         Tools.error "unable to check package signature for #{pkg} - "\
           "dpkg-sig returned:\n#{out}"
       end
 
       def sign_pkg(repo, pkg)
-        signature = check_sig(pkg)
-        unless signature.first[-6, 5] == 'NOSIG'
+        signature = check_sig pkg, true
+
+        unless signature[-6, 5] == 'NOSIG'
           return puts "-- dpkg-sig returned:\n#{signature.first}"
         end
 
