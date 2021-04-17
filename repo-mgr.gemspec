@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["\u0218tefan Rusu".freeze]
-  s.date = "2021-04-14"
+  s.date = "2021-04-17"
   s.description = "deb and rpm repository manager".freeze
   s.email = "saltwaterc@gmail.com".freeze
   s.executables = ["repo-mgr".freeze]
@@ -41,15 +41,19 @@ Gem::Specification.new do |s|
 
   if s.respond_to? :add_runtime_dependency then
     s.add_runtime_dependency(%q<colored>.freeze, ["~> 1.2"])
+    s.add_runtime_dependency(%q<gpgme>.freeze, ["~> 2.0"])
     s.add_runtime_dependency(%q<terminal-table>.freeze, ["~> 3.0"])
     s.add_runtime_dependency(%q<thor>.freeze, ["~> 1.1"])
     s.add_development_dependency(%q<jeweler>.freeze, [">= 0"])
+    s.add_development_dependency(%q<pry>.freeze, [">= 0"])
     s.add_development_dependency(%q<rubocop>.freeze, [">= 0"])
   else
     s.add_dependency(%q<colored>.freeze, ["~> 1.2"])
+    s.add_dependency(%q<gpgme>.freeze, ["~> 2.0"])
     s.add_dependency(%q<terminal-table>.freeze, ["~> 3.0"])
     s.add_dependency(%q<thor>.freeze, ["~> 1.1"])
     s.add_dependency(%q<jeweler>.freeze, [">= 0"])
+    s.add_dependency(%q<pry>.freeze, [">= 0"])
     s.add_dependency(%q<rubocop>.freeze, [">= 0"])
   end
 end

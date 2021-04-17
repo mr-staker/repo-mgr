@@ -12,6 +12,7 @@ Metrics/AbcSize:
 
 AllCops:
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
   - vendor/**/*
   - repo-mgr.gemspec
