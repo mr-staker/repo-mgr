@@ -72,8 +72,4 @@ repo-mgr upsert-repo --name foo --type deb --path path/to/foo --keyid GPGKEYID
 repo-mgr add-pkg --repo foo --path path/to/bar_0.0.1_amd64.deb
 ```
 
-You then need to sync the repo to whatever desired target. For the time being, this isn't implemented as the main use case for this tool is publishing into a git repository which is served as GitHub page.
-
-## TODO
-
- * git publisher (hook git commit on pkg-add and and command for publishing i.e git push)
+You then need to sync the repo to whatever desired target. For the time being, this isn't implemented. The main use case for this tool is publishing into a git repository which is then served as Cloudflare page.
