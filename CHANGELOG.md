@@ -1,3 +1,9 @@
+## v0.2.0
+
+ * Add git publisher.
+ * Fix issue with upsert-repo which wipes package list.
+ * Add rebuild-pkg-list CLI subcommand to rebuild pkg list from repo-mgr pkg cache.
+
 ## v0.1.1
 
  * Fix add-pkg for deb repos. Exposing the signature checker via CLI broke the internal use case.

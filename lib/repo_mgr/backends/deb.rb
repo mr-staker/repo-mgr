@@ -45,7 +45,7 @@ module RepoMgr
         repo_publish repo
       end
 
-      def check_sig(pkg, allow_fail = false)
+      def check_sig(pkg, allow_fail: false)
         out, status = Open3.capture2e "dpkg-sig --verify #{pkg}"
 
         return out if status.exitstatus.zero? || allow_fail
@@ -55,7 +55,7 @@ module RepoMgr
       end
 
       def sign_pkg(repo, pkg)
-        signature = check_sig pkg, true
+        signature = check_sig pkg, allow_fail: true
 
         unless signature[-6, 5] == 'NOSIG'
           return puts "-- dpkg-sig returned:\n#{signature.first}"
@@ -71,6 +71,21 @@ module RepoMgr
         return if status.exitstatus.zero?
 
         Tools.error "unable to sign #{pkg} - dpkg-sig returned:\n#{out}"
+      end
+
+      def rebuild_pkg_list(repo)
+        out, status = Open3.capture2e "aptly -config=#{@aptly_config_file} "\
+          "-with-packages repo show #{repo}"
+
+        unless status.exitstatus.zero?
+          Tools.error "aptly repo show failed with with:\n#{out}"
+        end
+
+        pkgs = out.split
+        mark = pkgs.find_index 'Packages:'
+        pkgs = pkgs.drop(mark + 1)
+
+        pkgs.map { |e| "#{e}.deb" }
       end
 
       private

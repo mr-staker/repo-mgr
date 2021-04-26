@@ -8,6 +8,7 @@ require 'terminal-table'
 require_relative 'tools'
 require_relative 'config'
 require_relative 'backends'
+require_relative 'publishers'
 
 module RepoMgr
   # implements CLI interface
@@ -20,12 +21,16 @@ module RepoMgr
       %w[deb rpm]
     end
 
+    def self.publishers
+      %w[git]
+    end
+
     desc 'check-depends', 'Check dependencies'
 
     def check_depends
       rows = []
 
-      %w[aptly dpkg-sig createrepo rpm].each do |bin_dep|
+      %w[aptly dpkg-sig createrepo rpm git].each do |bin_dep|
         rows << if Tools.which bin_dep
                   [bin_dep, '✔'.green]
                 else
@@ -45,13 +50,14 @@ module RepoMgr
                   desc: 'Directory path where to build the repository'
     option :keyid, type: :string, required: true, aliases: %w[-k],
                    desc: 'GPG key id used to sign the repository metadata'
+    option :publisher, type: :string, aliases: %w[-r], enum: publishers,
+                       desc: 'Publisher used to sync repo data to remote target'
 
     def upsert_repo
       FileUtils.mkdir_p options[:path]
 
       config = Config.new
-      config.upsert_repo options[:name], options[:type], options[:path],
-                         options[:keyid]
+      config.upsert_repo options
 
       backend = Backends.load options[:type], config
       backend.add_repo options[:name]
@@ -66,12 +72,14 @@ module RepoMgr
       config = Config.new
 
       config.cfg[:repos].each do |name, repo|
-        rows << [name, repo[:type], repo[:path], repo[:keyid]]
+        rows << [name, repo[:type], repo[:path], repo[:keyid], repo[:publisher]]
       end
 
       return puts '-- No repos have been created' if rows.count.zero?
 
-      puts Terminal::Table.new headings: %w[Name Type Path KeyID], rows: rows
+      puts Terminal::Table.new(
+        headings: %w[Name Type Path KeyID Publisher], rows: rows
+      )
     end
 
     desc 'add-pkg', 'Add package to repository'
@@ -85,6 +93,12 @@ module RepoMgr
       backend.add_pkg options[:repo], options[:path]
       config.add_pkg options[:repo], options[:path]
 
+      pub_type = config.cfg[:repos][options[:repo]][:publisher]
+      if pub_type
+        publisher = Publishers.load pub_type, config
+        publisher.save options[:repo], options[:path]
+      end
+
       puts "-- Added #{File.basename(options[:path])} to "\
         "#{options[:repo]} repository"
     end
@@ -94,7 +108,7 @@ module RepoMgr
                   desc: 'The repository to list the packages from'
 
     def list_pkgs
-      packages = Config.new.cfg[:repos][options[:repo]][:packages]
+      packages = Config.new.cfg[:packages][options[:repo]]
 
       if packages.nil?
         Tools.error "#{options[:repo]} repo does not have any packages"
@@ -128,6 +142,38 @@ module RepoMgr
     def check_sig
       backend, _config = load_backend options[:path]
       puts backend.check_sig options[:path]
+    end
+
+    desc 'rebuild-pkg-list', 'Rebuild package list from local pkg cache'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to rebuild pkg list for'
+    def rebuild_pkg_list
+      config = Config.new
+      backend = Backends.load config.cfg[:repos][options[:repo]][:type], config
+      pkgs = backend.rebuild_pkg_list options[:repo]
+
+      pkgs.each do |pkg|
+        config.add_pkg options[:repo], pkg
+      end
+
+      puts "-- Rebuilt #{options[:repo]} repo pkg list"
+    end
+
+    desc 'sync', 'Sync local repo to remote target using repo publisher'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to sync to remote target via publisher'
+    def sync
+      config = Config.new
+      pub_type = config.cfg[:repos][options[:repo]][:publisher]
+
+      unless pub_type
+        Tools.error "#{options[:repo]} repo does not have a publisher"
+      end
+
+      publisher = Publishers.load pub_type, config
+      publisher.sync options[:repo]
+
+      puts "-- Synchronised #{options[:repo]} using #{pub_type} publisher"
     end
 
     private

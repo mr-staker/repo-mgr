@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'colored', '~> 1.2'
+gem 'git', '~> 1.8.1'
 gem 'gpgme', '~> 2.0'
 gem 'terminal-table', '~> 3.0'
 gem 'thor', '~> 1.1'

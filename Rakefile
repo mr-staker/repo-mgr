@@ -6,7 +6,7 @@ begin
 
   Jeweler::Tasks.new do |gem|
     gem.name        = 'repo-mgr'
-    gem.version     = '0.1.1'
+    gem.version     = '0.2.0'
     gem.summary     = %(deb and rpm repository manager)
     gem.description = %(deb and rpm repository manager)
     gem.author      = 'Ștefan Rusu'
@@ -26,6 +26,11 @@ begin
   RuboCop::RakeTask.new
 rescue LoadError
   warn 'Rubocop, or one of its dependencies, is not available.'
+end
+
+desc 'Remove build artefacts'
+task :clean_pkg do
+  rm_rf 'pkg'
 end
 
 task default: %i[rubocop]

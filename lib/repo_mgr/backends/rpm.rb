@@ -69,6 +69,12 @@ module RepoMgr
         Tools.error "unable to sign #{pkg} - rpm --addsign returned:\n#{out}"
       end
 
+      def rebuild_pkg_list(repo)
+        Dir["#{@config.cfg_dir}/rpms/#{repo}/**/*.rpm"].map do |e|
+          File.basename e
+        end
+      end
+
       private
 
       def extract_arch(pkg)

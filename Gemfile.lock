@@ -89,6 +89,7 @@ PLATFORMS
 
 DEPENDENCIES
   colored (~> 1.2)
+  git (~> 1.8.1)
   gpgme (~> 2.0)
   jeweler
   pry
