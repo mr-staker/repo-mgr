@@ -76,6 +76,7 @@ repo-mgr help
 # create repo
 ## --path => a local directory where the repository is published - no remote support at the moment
 ## GPGKEYID is expected as log keyid i.e 16 hex chars
+## --publisher - is optional i.e you can still manually publish a local repository
 repo-mgr upsert-repo --name foo --type deb --path path/to/foo --keyid GPGKEYID --publisher git
 
 # sign package, add to repository, and update local repo (includes sign repo release manifest)
@@ -87,3 +88,15 @@ repo-mgr add-pkg --repo foo --path path/to/bar_0.0.1_amd64.deb
 # publish the repository to a remote - for git publisher this means doing git push
 repo-mgr sync --repo foo
 ```
+
+## Migrating from v0.1
+
+The package list is stored into a structure that's prone to lose the list upon re-running `upsert-repo` for `v0.1.x` of this gem. For this reason, the package list data structure has been redesigned within repo-mgr's config file.
+
+So, to migrate from this earlier version, you must run, for every repo:
+
+```bash
+repo-mgr rebuild-pkg-list --repo foo
+```
+
+This rebuilds the data structure in the new config location.
