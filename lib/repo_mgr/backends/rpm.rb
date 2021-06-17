@@ -75,6 +75,10 @@ module RepoMgr
         end
       end
 
+      def export(repo)
+        sync_repo repo
+      end
+
       private
 
       def extract_arch(pkg)

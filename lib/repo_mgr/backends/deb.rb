@@ -88,6 +88,10 @@ module RepoMgr
         pkgs.map { |e| "#{e}.deb" }
       end
 
+      def export(repo)
+        repo_publish repo
+      end
+
       private
 
       def init_aptly_config

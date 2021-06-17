@@ -1,3 +1,7 @@
+## v0.2.1
+
+ * Add repo exporter to rebuild a local repo.
+
 ## v0.2.0
 
  * Add git publisher.

@@ -176,6 +176,18 @@ module RepoMgr
       puts "-- Synchronised #{options[:repo]} using #{pub_type} publisher"
     end
 
+    desc 'export', 'Export packages and metadata as local repository'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to export'
+    def export
+      config = Config.new
+      backend = Backends.load config.cfg[:repos][options[:repo]][:type], config
+
+      backend.export options[:repo]
+
+      puts "-- Exported #{options[:repo]} repo"
+    end
+
     private
 
     def load_backend(path)
