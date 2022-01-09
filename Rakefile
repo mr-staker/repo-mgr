@@ -1,10 +1,10 @@
 # frozen_string_literal: false
 
-# Jeweler stuff
+# Juwelier stuff
 begin
-  require 'jeweler'
+  require 'juwelier'
 
-  Jeweler::Tasks.new do |gem|
+  Juwelier::Tasks.new do |gem|
     gem.name        = 'repo-mgr'
     gem.version     = '0.2.1'
     gem.summary     = %(deb and rpm repository manager)
@@ -17,7 +17,7 @@ begin
     gem.homepage    = 'https://github.com/mr-staker/repo-mgr'
   end
 rescue LoadError
-  warn 'Jeweler, or one of its dependencies, is not available.'
+  warn 'Juwelier, or one of its dependencies, is not available.'
 end
 
 begin
