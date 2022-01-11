@@ -26,21 +26,21 @@ gem install repo-mgr
 rake install
 ```
 
-As repo-mgr is a frontend for other tools, there's dependencies which must be installed separately.
+As repo-mgr is a frontend for other tools, there are dependencies which must be installed separately. It is not compulsory to install all dependencies, only those needed for a particular use case. The purpose for each tool is explained by `check-depends`.
 
-To check which dependencies are required and their status:
+To check which dependencies are required based on use case and their status:
 
 ```bash
 repo-mgr check-depends
-+------------+--------+
-| Binary     | Status |
-+------------+--------+
-| aptly      | ✔      |
-| dpkg-sig   | ✔      |
-| createrepo | ✔      |
-| rpm        | ✔      |
-| git        | ✔      |
-+------------+--------+
++------------+--------+-----------------------+
+| Binary     | Status | Purpose               |
++------------+--------+-----------------------+
+| aptly      | ✔      | Manage apt repository |
+| dpkg-sig   | ✔      | Sign deb packages     |
+| createrepo | ✔      | Manage rpm repository |
+| rpm        | ✔      | Sign rpm packages     |
+| git        | ✔      | Use git publisher     |
++------------+--------+-----------------------+
 ```
 
 For managing deb repositories:

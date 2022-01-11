@@ -27,18 +27,27 @@ module RepoMgr
 
     desc 'check-depends', 'Check dependencies'
 
+    def which_depends(bin_dep, purpose)
+      return [bin_dep, '✔'.green, purpose] if Tools.which bin_dep
+
+      [bin_dep, '✘'.red, purpose]
+    end
+
     def check_depends
       rows = []
+      deps = {
+        'aptly' => 'Manage apt repository',
+        'dpkg-sig' => 'Sign deb packages',
+        'createrepo' => 'Manage rpm repository',
+        'rpm' => 'Sign rpm packages',
+        'git' => 'Use git publisher'
+      }
 
-      %w[aptly dpkg-sig createrepo rpm git].each do |bin_dep|
-        rows << if Tools.which bin_dep
-                  [bin_dep, '✔'.green]
-                else
-                  [bin_dep, '✘'.red]
-                end
+      deps.each do |bin_dep, purpose|
+        rows << which_depends(bin_dep, purpose)
       end
 
-      puts Terminal::Table.new headings: %w[Binary Status], rows: rows
+      puts Terminal::Table.new headings: %w[Binary Status Purpose], rows: rows
     end
 
     desc 'upsert-repo', 'Create/Update new repository'
