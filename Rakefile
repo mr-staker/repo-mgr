@@ -6,7 +6,7 @@ begin
 
   Juwelier::Tasks.new do |gem|
     gem.name        = 'repo-mgr'
-    gem.version     = '0.2.1'
+    gem.version     = '0.3.0'
     gem.summary     = %(deb and rpm repository manager)
     gem.description = %(deb and rpm repository manager)
     gem.author      = 'Ștefan Rusu'
