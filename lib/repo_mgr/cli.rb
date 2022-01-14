@@ -27,12 +27,6 @@ module RepoMgr
 
     desc 'check-depends', 'Check dependencies'
 
-    def which_depends(bin_dep, purpose)
-      return [bin_dep, '✔'.green, purpose] if Tools.which bin_dep
-
-      [bin_dep, '✘'.red, purpose]
-    end
-
     def check_depends
       rows = []
       deps = {
@@ -89,6 +83,26 @@ module RepoMgr
       puts Terminal::Table.new(
         headings: %w[Name Type Path KeyID Publisher], rows: rows
       )
+    end
+
+    desc 'dl-repo', 'Download repository from remote endpoint'
+    option :repo, type: :string, required: true, aliases: %w[-r],
+                  desc: 'The repository to download packages into'
+    option :type, type: :string, required: true, aliases: %w[-t],
+                  enum: types, desc: 'Repository type'
+    option :url, type: :string, required: true, aliases: %w[-u],
+                 desc: 'The URL for the remote repository'
+    option :keyring, type: :string, aliases: %w[-k],
+                     desc: 'Name of keyring file if required to auth repository'
+
+    def dl_repo
+      backend, config = load_backend options[:type]
+
+      pkgs = backend.dl_repo options[:name], options[:url], options[:keyring]
+
+      pkgs.each do |pkg|
+        config.add_pkg options[:name], pkg
+      end
     end
 
     desc 'add-pkg', 'Add package to repository'
@@ -199,8 +213,15 @@ module RepoMgr
 
     private
 
+    def which_depends(bin_dep, purpose)
+      return [bin_dep, '✔'.green, purpose] if Tools.which bin_dep
+
+      [bin_dep, '✘'.red, purpose]
+    end
+
     def load_backend(path)
       type = File.extname(path).strip.downcase[1..-1]
+      type = path if type.nil?
 
       unless CLI.types.include? type
         Tools.error "unsupported package type #{type}"

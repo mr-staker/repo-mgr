@@ -1,3 +1,8 @@
+## v0.3.0
+
+ * Add remote repo downloader.
+ * Update dependencies to solve security problems.
+
 ## v0.2.1
 
  * Add repo exporter to rebuild a local repo.

@@ -16,12 +16,7 @@ module RepoMgr
       def add_repo(name)
         return if aptly_repos.include? name
 
-        cmd = "aptly -config=#{@aptly_config_file} repo create #{name}"
-        out, status = Open3.capture2e cmd
-
-        unless status.exitstatus.zero?
-          Tools.error "aptly repo create failed with:\n#{out}"
-        end
+        aptly "repo create #{name}"
 
         repo_config = @config.cfg[:repos][name]
 
@@ -32,6 +27,20 @@ module RepoMgr
         }
 
         save_aptly_config
+      end
+
+      def dl_repo(name, url, keyring)
+        if keyring.nil?
+          Tools.error 'you must specify a keyring file for deb repo'
+        end
+
+        keyring = "/usr/share/keyrings/#{keyring}"
+
+        aptly "-keyring=#{keyring} mirror create #{name} #{url} stable main"
+        aptly "-keyring=#{keyring} mirror update #{name}", :output
+        aptly "repo import #{name} #{name} Name"
+        aptly "mirror drop #{name}"
+        aptly("repo search #{name}", :return).split.map { |e| "#{e}.deb" }
       end
 
       def add_pkg(repo, pkg)
@@ -74,18 +83,9 @@ module RepoMgr
       end
 
       def rebuild_pkg_list(repo)
-        out, status = Open3.capture2e "aptly -config=#{@aptly_config_file} "\
-          "-with-packages repo show #{repo}"
-
-        unless status.exitstatus.zero?
-          Tools.error "aptly repo show failed with with:\n#{out}"
+        aptly("-with-packages repo search #{repo}", :return).split.map do |e|
+          "#{e}.deb"
         end
-
-        pkgs = out.split
-        mark = pkgs.find_index 'Packages:'
-        pkgs = pkgs.drop(mark + 1)
-
-        pkgs.map { |e| "#{e}.deb" }
       end
 
       def export(repo)
@@ -121,8 +121,6 @@ module RepoMgr
           dependencyVerboseResolve: false,
           gpgDisableSign: false,
           gpgDisableVerify: false,
-          # despite the binary being gpg, this must spell gpg2, otherwise aptly
-          # defaults to gpg1 with less than impressive results
           gpgProvider: 'gpg2',
           downloadSourcePackages: false,
           skipLegacyPool: true,
@@ -136,36 +134,30 @@ module RepoMgr
       end
       # rubocop:enable Metrics/MethodLength
 
-      def aptly_repos
-        cmd = "aptly -raw -config=#{@aptly_config_file} repo list"
+      def aptly(cmd, output = nil)
+        cmd = "aptly -config=#{@aptly_config_file} #{cmd}"
         out, status = Open3.capture2e cmd
 
-        unless status.exitstatus.zero?
-          Tools.error "aptly repo list failed with:\n#{out}"
-        end
+        Tools.error "#{cmd} failed with:\n#{out}" unless status.exitstatus.zero?
 
-        out.split("\n")
+        case output
+        when :output
+          puts out
+        when :return
+          out
+        end
+      end
+
+      def aptly_repos
+        aptly('-raw repo list', :return).split
       end
 
       def aptly_published_repos
-        cmd = "aptly -raw -config=#{@aptly_config_file} publish list"
-        out, status = Open3.capture2e cmd
-
-        unless status.exitstatus.zero?
-          Tools.error "aptly publish list failed with:\n#{out}"
-        end
-
-        out.split("\n")
+        aptly('-raw publish list', :return).split
       end
 
       def aptly_publish_drop(repo)
-        cmd = "aptly -config=#{@aptly_config_file} publish drop stable "\
-          "filesystem:#{repo}:"
-        out, status = Open3.capture2e cmd
-
-        return if status.exitstatus.zero?
-
-        Tools.error "aptly publish drop failed with:\n#{out}"
+        aptly "publish drop stable filesystem:#{repo}:"
       end
 
       def save_aptly_config
@@ -173,23 +165,12 @@ module RepoMgr
       end
 
       def repo_add(repo, pkg)
-        cmd = "aptly -config=#{@aptly_config_file} repo add #{repo} #{pkg}"
-        out, status = Open3.capture2e cmd
-
-        return if status.exitstatus.zero?
-
-        Tools.error "aptly repo add failed with:\n#{out}"
+        aptly "repo add #{repo} #{pkg}"
       end
 
       def repo_rm(repo, pkg)
         package = File.basename pkg, File.extname(pkg)
-        cmd = "aptly -config=#{@aptly_config_file} repo remove "\
-          "#{repo} #{package}"
-        out, status = Open3.capture2e cmd
-
-        return if status.exitstatus.zero?
-
-        Tools.error "aptly repo remove failed with:\n#{out}"
+        aptly "repo remove #{repo} #{package}"
       end
 
       def repo_publish(repo)
@@ -198,14 +179,8 @@ module RepoMgr
         end
 
         keyid = @config.cfg[:repos][repo][:keyid]
-        cmd = "aptly -config=#{@aptly_config_file} -distribution=stable "\
-          "-gpg-key=#{keyid} publish repo #{repo} filesystem:#{repo}:"
-
-        out, status = Open3.capture2e cmd
-
-        return if status.exitstatus.zero?
-
-        Tools.error "aptly publish repo failed with:\n#{out}"
+        aptly "-distribution=stable -gpg-key=#{keyid} publish repo #{repo} "\
+          "filesystem:#{repo}:"
       end
     end
   end
