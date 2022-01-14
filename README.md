@@ -103,7 +103,12 @@ repo-mgr sync --repo foo
 ## --keyring is required for deb repositories; it is a file from
 ## /usr/share/keyrings - the base path is automatically prepended
 ## WARNING: the packages are not signed when imported via this method!
-repo-mgr dl-repo --name foo --type deb --url https://foo.example.com --keyring foo-keyring.gpg
+repo-mgr dl-repo --repo foo --type deb --url https://apt.example.com --keyring foo-keyring.gpg
+
+## --arch must be specified as each rpm repo arch is self-contained
+## the remote repository gpg key must be imported into the user's keyring and trusted
+## prior to starting the import process from remote rpm repo
+repo-mgr dl-repo --repo foo --type rpm --url https://rpm.example.com --arch x86_64
 ```
 
 ## Migrating from v0.1

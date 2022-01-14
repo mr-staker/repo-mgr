@@ -94,14 +94,16 @@ module RepoMgr
                  desc: 'The URL for the remote repository'
     option :keyring, type: :string, aliases: %w[-k],
                      desc: 'Name of keyring file if required to auth repository'
+    option :arch, type: :string, aliases: %w[-a],
+                  desc: 'Pkg arch if multiple arch are supported by repo'
 
     def dl_repo
       backend, config = load_backend options[:type]
 
-      pkgs = backend.dl_repo options[:name], options[:url], options[:keyring]
+      pkgs = backend.dl_repo options
 
       pkgs.each do |pkg|
-        config.add_pkg options[:name], pkg
+        config.add_pkg options[:repo], pkg
       end
     end
 

@@ -27,7 +27,11 @@ module RepoMgr
         save_aptly_config
       end
 
-      def dl_repo(name, url, keyring)
+      def dl_repo(options)
+        name = options[:repo]
+        url = options[:url]
+        keyring = options[:keyring]
+
         if keyring.nil?
           Tools.error 'you must specify a keyring file for deb repo'
         end

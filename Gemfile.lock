@@ -64,7 +64,7 @@ GEM
     multi_json (1.15.0)
     multi_xml (0.6.0)
     multipart-post (2.1.1)
-    nokogiri (1.13.0)
+    nokogiri (1.13.1)
       mini_portile2 (~> 2.7.0)
       racc (~> 1.4)
     oauth2 (1.4.7)
@@ -84,7 +84,7 @@ GEM
     public_suffix (4.0.6)
     racc (1.6.0)
     rack (2.2.3)
-    rainbow (3.0.0)
+    rainbow (3.1.1)
     rake (13.0.1)
     rchardet (1.8.0)
     rdoc (6.4.0)
@@ -117,9 +117,11 @@ PLATFORMS
 
 DEPENDENCIES
   colored (~> 1.2)
+  faraday (~> 1.9.3)
   git (~> 1.8.1)
   gpgme (~> 2.0)
   juwelier
+  nokogiri (~> 1.13.1)
   pry
   rake (= 13.0.1)
   rubocop

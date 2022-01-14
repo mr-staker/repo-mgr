@@ -3,8 +3,10 @@
 source 'https://rubygems.org'
 
 gem 'colored', '~> 1.2'
+gem 'faraday', '~> 1.9.3'
 gem 'git', '~> 1.8.1'
 gem 'gpgme', '~> 2.0'
+gem 'nokogiri', '~> 1.13.1'
 gem 'terminal-table', '~> 3.0'
 gem 'thor', '~> 1.1'
 

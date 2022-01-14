@@ -1,7 +1,12 @@
 # frozen_string_literal: false
 
+require 'zlib'
 require 'open3'
 require 'gpgme'
+require 'digest'
+require 'faraday'
+require 'nokogiri'
+require 'stringio'
 require 'fileutils'
 
 module RepoMgr
@@ -25,6 +30,29 @@ module RepoMgr
         FileUtils.cp pkg, dest_dir
 
         sync_repo repo
+      end
+
+      def dl_repo(options)
+        name = options[:repo]
+        url = options[:url]
+        arch = options[:arch]
+
+        Tools.error 'you must specify an arch name for rpm repo' if arch.nil?
+
+        tmpdir = "/tmp/#{name}/#{arch}"
+        destdir = "#{@config.cfg_dir}/rpms/#{name}"
+        FileUtils.mkdir_p tmpdir
+        FileUtils.mkdir_p destdir
+
+        repomd = dl_repomd url, arch, tmpdir
+        pkgs = dl_primary url, arch, tmpdir, repomd
+
+        pkgs.each do |hash, file|
+          dl_pkg hash, url, arch, file, tmpdir
+          copy_pkg "#{tmpdir}/#{file}", destdir
+        end
+
+        pkgs.values
       end
 
       def remove_pkg(repo, pkg)
@@ -130,6 +158,78 @@ module RepoMgr
         signature = GPGME::Crypto.sign data, opt
 
         File.write 'repomd.xml.asc', signature
+      end
+
+      def faraday_dl(url, tmpdir, file = File.basename(url))
+        puts "-- Download #{file}"
+        File.write "#{tmpdir}/#{file}", Faraday.get(url).body
+      end
+
+      def dl_repomd(url, arch, tmpdir)
+        faraday_dl "#{url}/#{arch}/repodata/repomd.xml", tmpdir
+        faraday_dl "#{url}/#{arch}/repodata/repomd.xml.asc", tmpdir
+
+        valid = false
+        crypto = GPGME::Crypto.new armor: true
+        sig = GPGME::Data.new File.read "#{tmpdir}/repomd.xml.asc"
+        data = File.read "#{tmpdir}/repomd.xml"
+        crypto.verify(sig, signed_text: data) do |sign|
+          valid = sign.valid?
+        end
+
+        unless valid == true
+          Tools.error "unable to check signature for #{tmpdir}/repomd.xml"
+        end
+
+        Nokogiri::XML data
+      end
+
+      def extract_pkgs(primary)
+        pkgs = {}
+
+        primary.css('package').each do |pkg|
+          pkg_hash = pkg.at('checksum[type=sha256]').text
+          pkgs[pkg_hash] = pkg.at('location')['href']
+        end
+
+        pkgs
+      end
+
+      def dl_primary(url, arch, tmpdir, repomd)
+        hash = repomd.at('data[type=primary]').at('checksum').text
+        primary = "#{url}/#{arch}/repodata/#{hash}-primary.xml.gz"
+
+        faraday_dl primary, tmpdir, 'primary.xml.gz'
+
+        primary_xml_gz = "#{tmpdir}/primary.xml.gz"
+        fl_hash = Digest::SHA256.hexdigest(File.read(primary_xml_gz))
+
+        unless fl_hash == hash
+          Tools.error "failed hash check for #{tmpdir}/primary.xml.gz"
+        end
+
+        primary_xml_gz = File.read("#{tmpdir}/primary.xml.gz")
+        primary = Zlib::GzipReader.new(StringIO.new(primary_xml_gz)).read
+        File.write("#{tmpdir}/primary.xml", primary)
+
+        extract_pkgs Nokogiri::XML(primary)
+      end
+
+      def dl_pkg(hash, url, arch, file, tmpdir)
+        unless File.exist? "#{tmpdir}/#{file}"
+          faraday_dl "#{url}/#{arch}/#{file}", tmpdir
+        end
+
+        fl_hash = Digest::SHA256.hexdigest(File.read("#{tmpdir}/#{file}"))
+
+        return if fl_hash == hash
+
+        Tools.error "failed hash check for #{tmpdir}/#{file}"
+      end
+
+      def copy_pkg(file, destdir)
+        puts "-- Copy to repo-mgr #{File.basename(file)}"
+        FileUtils.cp file, destdir
       end
     end
   end
