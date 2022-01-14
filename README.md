@@ -16,6 +16,8 @@ To simplify things:
  * aptly (which, kind of obviously, manages deb repositories) uses "stable" as distribution and "main" as component.
  * The git publisher uses the `main` branch for `sync` only.
 
+The requred aptly version is 1.4.0+ which may be installed from [aptly's deb repository](https://www.aptly.info/download/). The version available in Ubuntu 20.04 (1.3.0) doesn't support gpg2.
+
 ## Install
 
 ```bash
