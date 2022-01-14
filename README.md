@@ -89,6 +89,15 @@ repo-mgr add-pkg --repo foo --path path/to/bar_0.0.1_amd64.deb
 
 # publish the repository to a remote - for git publisher this means doing git push
 repo-mgr sync --repo foo
+
+# download repo from remote e.g when changing development machines
+# repo-mgr upsert-repo (...) # needed only once if the machine is brand new
+## --url must point to the root of the remote repository
+## i.e where the pool and dists directories can be found for deb repos
+## --keyring is required for deb repositories; it is a file from
+## /usr/share/keyrings - the base path is automatically prepended
+## WARNING: the packages are not signed when imported via this method!
+repo-mgr dl-repo --name foo --type deb --url https://foo.example.com --keyring foo-keyring.gpg
 ```
 
 ## Migrating from v0.1
