@@ -40,17 +40,18 @@ module RepoMgr
         Tools.error 'you must specify an arch name for rpm repo' if arch.nil?
 
         tmpdir = "/tmp/#{name}/#{arch}"
-        destdir = "#{@config.cfg_dir}/rpms/#{name}"
-        FileUtils.mkdir_p tmpdir
-        FileUtils.mkdir_p destdir
+        dest_dir = "#{@config.cfg_dir}/rpms/#{name}/#{arch}"
+        make_dirs tmpdir, dest_dir
 
         repomd = dl_repomd url, arch, tmpdir
         pkgs = dl_primary url, arch, tmpdir, repomd
 
         pkgs.each do |hash, file|
           dl_pkg hash, url, arch, file, tmpdir
-          copy_pkg "#{tmpdir}/#{file}", destdir
+          copy_pkg "#{tmpdir}/#{file}", dest_dir
         end
+
+        sync_repo name
 
         pkgs.values
       end
@@ -230,6 +231,11 @@ module RepoMgr
       def copy_pkg(file, destdir)
         puts "-- Copy to repo-mgr #{File.basename(file)}"
         FileUtils.cp file, destdir
+      end
+
+      def make_dirs(tmpdir, dest_dir)
+        FileUtils.mkdir_p tmpdir
+        FileUtils.mkdir_p dest_dir
       end
     end
   end
