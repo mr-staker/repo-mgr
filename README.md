@@ -69,6 +69,12 @@ sudo apt install git
 
 You can get our build of createrepo from our [deb repository](https://deb.staker.ltd/).
 
+Pro tip: if the pkg signing fails because gpg can't open the output device, add this to your shell config:
+
+```bash
+export GPG_TTY=$(tty)
+```
+
 ## How to use
 
 ```bash

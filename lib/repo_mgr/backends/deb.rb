@@ -14,9 +14,7 @@ module RepoMgr
       end
 
       def add_repo(name)
-        return if aptly_repos.include? name
-
-        aptly "repo create #{name}"
+        aptly "repo create #{name}" unless aptly_repos.include? name
 
         repo_config = @config.cfg[:repos][name]
 
@@ -67,7 +65,7 @@ module RepoMgr
         signature = check_sig pkg, allow_fail: true
 
         unless signature[-6, 5] == 'NOSIG'
-          return puts "-- dpkg-sig returned:\n#{signature.first}"
+          return puts "-- dpkg-sig returned:\n#{signature.split.first}"
         end
 
         if @config.cfg[:repos][repo].nil?
@@ -153,7 +151,7 @@ module RepoMgr
       end
 
       def aptly_published_repos
-        aptly('-raw publish list', :return).split
+        aptly('-raw publish list', :return).split("\n")
       end
 
       def aptly_publish_drop(repo)
