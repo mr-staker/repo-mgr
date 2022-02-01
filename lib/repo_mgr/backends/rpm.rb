@@ -72,7 +72,7 @@ module RepoMgr
         return out if status.exitstatus.zero?
 
         Tools.error "unable to check package signature for #{pkg} - "\
-          "rpm -K returned:\n#{out}"
+                    "rpm -K returned:\n#{out}"
       end
 
       def sign_pkg(repo, pkg)
@@ -143,7 +143,7 @@ module RepoMgr
         return if status.exitstatus.zero?
 
         Tools.error "unable to create repo for #{arch} - createrepo "\
-          "returned:\n#{out}"
+                    "returned:\n#{out}"
       end
 
       def sign_repo(repo)

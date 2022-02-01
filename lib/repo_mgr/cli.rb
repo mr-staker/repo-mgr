@@ -125,7 +125,7 @@ module RepoMgr
       end
 
       puts "-- Added #{File.basename(options[:path])} to "\
-        "#{options[:repo]} repository"
+           "#{options[:repo]} repository"
     end
 
     desc 'list-pkgs', 'List repository packages'
@@ -157,7 +157,7 @@ module RepoMgr
       config.remove_pkg options[:repo], options[:path]
 
       puts "-- Removed #{File.basename(options[:path])} from "\
-        "#{options[:repo]} repository"
+           "#{options[:repo]} repository"
     end
 
     desc 'check-sig', 'Check package signature'

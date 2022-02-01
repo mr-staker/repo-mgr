@@ -62,7 +62,7 @@ module RepoMgr
         return out if status.exitstatus.zero? || allow_fail
 
         Tools.error "unable to check package signature for #{pkg} - "\
-          "dpkg-sig returned:\n#{out}"
+                    "dpkg-sig returned:\n#{out}"
       end
 
       def sign_pkg(repo, pkg)
@@ -182,7 +182,7 @@ module RepoMgr
 
         keyid = @config.cfg[:repos][repo][:keyid]
         aptly "-distribution=stable -gpg-key=#{keyid} publish repo #{repo} "\
-          "filesystem:#{repo}:"
+              "filesystem:#{repo}:"
       end
     end
   end

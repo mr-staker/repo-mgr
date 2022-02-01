@@ -68,7 +68,7 @@ module RepoMgr
     def remove_pkg(repo, path)
       if @cfg[:repos][repo].nil?
         Tools.error "unable to remove packages from #{repo} "\
-          '- repo does not exist'
+                    '- repo does not exist'
       end
 
       @cfg[:packages] ||= {}
