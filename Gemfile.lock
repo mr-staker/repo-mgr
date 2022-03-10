@@ -121,7 +121,7 @@ DEPENDENCIES
   git (~> 1.8.1)
   gpgme (~> 2.0)
   juwelier
-  nokogiri (~> 1.13.1)
+  nokogiri (~> 1.13.3)
   pry
   rake (= 13.0.1)
   rubocop
