@@ -77,7 +77,7 @@ module RepoMgr
 
       def sign_pkg(repo, pkg)
         keyid = @config.cfg[:repos][repo][:keyid]
-        gpg_name = GPGME::Key.find(keyid).first.uids.first.uid
+        gpg_name = GPGME::Key.get(keyid).uids.first.uid
 
         # need to deal with the %_gpg_name nonsense as adding that via CLI is
         # too bloody much for ARRRRRRRRRR PM - also who in their right mind

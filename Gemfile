@@ -13,6 +13,6 @@ gem 'thor', '~> 1.1'
 group :development do
   gem 'juwelier'
   gem 'pry'
-  gem 'rake', '13.0.1'
+  gem 'rake', '13.0.3'
   gem 'rubocop'
 end

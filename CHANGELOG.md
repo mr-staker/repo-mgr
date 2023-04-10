@@ -1,3 +1,7 @@
+## v0.3.1
+
+ * Fix GPG key seeking for RPM repos. `GPGME::Key.find` is less reliable than `GPGME::Key.get`.
+
 ## v0.3.0
 
  * Add remote repo downloader.
